@@ -1,13 +1,5 @@
-# CLEAN KILOBOTS DIRECTORY / APRIL 2018
-
-Created by Amaury Camus (amaury.camus92@gmail.com)     
-Supervision : Vito Trianni
-
 ## Description
-This is an attempt to create a self sufficient and clean repository for kilobots:
-
-- For real robots
-- For simulation on ARGoS
+This repository can run experiment for Kilobots using ARGoS Simulation and LMCRW as random walk.
 
 ## src folder
 It contains all the code. See internal README for more information  
@@ -44,4 +36,7 @@ Steps:
 - Make sure you have argos3 installed (typing `which argos3` should give the path to the executable)  
 - Make sure you are in the root folder
 - From the root folder, use the command `argos3 -c simulation_config/MY_CONFIG.argos`
+
+### Lauching multiple simulation
+Using main.py script you can run multiple simulations at once. You just need to configure `simulation_config/exp_config.xml` file and then run `python3 main.py`
 

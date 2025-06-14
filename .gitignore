@@ -20,3 +20,4 @@ images/
 *_time_results.tsv
 *.pkl
 old_scripts/
+data/
