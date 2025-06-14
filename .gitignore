@@ -1,0 +1,22 @@
+.vscode/
+build
+build_local/
+simulation_config/build/*
+simulation_config/generated_configs/
+python_test/*
+src/behaviors/parameters_rbn.txt
+src/kilobots/build_local/*
+Argos3*
+Argos3-Kilobot*
+argos3-kilobot-master/*
+argos3-master/*
+results/plots
+test_scripts/*
+plot scripts/results*
+**/__pycache__
+*.pyc
+images/
+*_position.tsv
+*_time_results.tsv
+*.pkl
+old_scripts/

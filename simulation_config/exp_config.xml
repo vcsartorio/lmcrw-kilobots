@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='ASCII'?>
+<sim-config 
+    alpha="1.8"
+    rho="0.75"
+    num_robots="80"
+    arena_radius="0.925"
+    simulation_time="12000"
+    max_trials="100"
+    evaluations="20"
+    num_threads="10"
+    kilobot_bias="True">
+</sim-config>
+
