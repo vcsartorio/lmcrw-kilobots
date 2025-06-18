@@ -1,4 +1,7 @@
 from lxml import etree
+import os
+import csv
+import pandas as pd
 
 def readExperimentConfigFile(exp_config_options):
     exp_config = dict()
@@ -19,3 +22,60 @@ def readExperimentConfigFile(exp_config_options):
         print("Couldnt read config experiment options!\n" + str(e))
 
     return exp_config
+
+def readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluations):
+    data_dict = dict()
+    data_dict['Label'] = []
+    data_dict['strategy'] = []
+    data_dict['alpha'] = []
+    data_dict['rho'] = []
+    data_dict['First Passage Time'] = []
+
+    for subdir, dirs, files in os.walk(folder):
+        files.sort()
+
+        for file_name in files:
+            experiment_parameters = dict()
+            experiment_parameters['n_robots'] = 1
+            experiment_parameters['alpha'] = -1
+            experiment_parameters['rho'] = -1
+            experiment_parameters['evaluations'] = 1
+
+            elements = file_name[:-4].split("_")
+            experiment_parameters['strategy'] = elements[0]
+            for e in elements[1:]:
+                if e.endswith("R"):
+                    experiment_parameters['n_robots'] = int(e.replace("R", ""))
+                if e.endswith("a"):
+                    experiment_parameters['alpha'] = float(e.replace("a", ""))
+                if e.endswith("p"):
+                    experiment_parameters['rho'] = float(e.replace("p", ""))
+                if e.endswith("e"):
+                    experiment_parameters['evaluations'] = int(e.replace("e", ""))
+
+            if experiment_parameters['strategy'] != "crwlevy":
+                continue
+            if experiment_parameters['alpha'] not in alpha_values:
+                continue
+            if experiment_parameters['rho'] not in rho_values:
+                continue
+            if experiment_parameters['evaluations'] != evaluations:
+                continue
+ 
+            with open(folder + file_name, "r") as dfile:
+                try:
+                    label_name = f"a:{experiment_parameters['alpha']} r:{experiment_parameters['rho']}"
+                    read_tsv = csv.reader(dfile, delimiter="\t")
+                    next(read_tsv, None)
+                    for row in read_tsv:
+                        data_dict['Label'].append(label_name)
+                        data_dict['strategy'].append(experiment_parameters['strategy'])
+                        data_dict['alpha'].append(experiment_parameters['alpha'])
+                        data_dict['rho'].append(experiment_parameters['rho'])
+                        data_dict['First Passage Time'].append(float(row[1])/32.0)
+                    dfile.close()
+                except Exception as e:
+                    print(("Couldnt read results file: %s!\nException: " + str(e)) % (file_name))
+
+    df = pd.DataFrame(data_dict)
+    return df

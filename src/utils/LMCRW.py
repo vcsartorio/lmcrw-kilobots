@@ -13,7 +13,8 @@ class LMCRW:
         self.experiment_performance = ExperimentPerformance.ExperimentPerformance(num_robots, num_trials)
         if kwargs.get('save_exp'):
             self.experiment_date = kwargs.get('date')
-            self.performance_file = "LMCRW_%dR_%.1fa_%.2fp_%dcm%s.tsv" % (num_robots, self.alpha, self.rho, arena_radius, self.experiment_date if self.experiment_date else "")
+            self.num_evaluations = kwargs.get('num_eval')
+            self.performance_file = "LMCRW_%dR_%.1fa_%.2fp_%dcm_%de_%s.tsv" % (num_robots, self.alpha, self.rho, arena_radius, self.num_evaluations, self.experiment_date if self.experiment_date else "")
             self.experiment_performance.initializeExperiment(self.performance_file, self.exp_id)
 
     def resetExperimentResults(self):
