@@ -4,7 +4,7 @@ import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 import scripts.io_scripts as io_scripts
 
-folder = "Data/Weibull Discovery Time/"
+folder = "/data/Fpt-performance/"
 alpha_values = [1.2, 1.4, 1.6, 1.8, 2.0]
 rho_values = [0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]
 
@@ -17,10 +17,12 @@ def plotHeatMapParametersSearch(experiment_config):
     num_threads = experiment_config['num_threads']
     kilobot_bias = experiment_config['kilobot_bias']
 
-    df = io_scripts.readLMCRWFptResults(num_robots, alpha_values, rho_values, evaluations)
-    result = df.pivot_table(index='alpha', columns='rho', values='First Passage Time')
+    df = io_scripts.readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluations)
+    result_weibull = df.pivot_table(index='alpha', columns='rho', values='Weibull Discovery Time')
+    result_discovery = df.pivot_table(index='alpha', columns='rho', values='Discovery Time')
+    result_frac_disc = df.pivot_table(index='alpha', columns='rho', values='Fraction Discovery')
 
-    ax = sns.heatmap(result, annot=True, fmt="g", cmap='viridis')
+    ax = sns.heatmap(result_frac_disc, annot=True, fmt=".2f", cmap='mako',cbar_kws={'label':'Fraction Discovery'})
     ax.invert_yaxis()
     plt.title(f"LMCRW experiment w/ {num_robots}R - {evaluations} evaluations of 100 trials")
     plt.show()
@@ -34,7 +36,7 @@ def plotBoxplotParametersSearch(experiment_config):
     num_threads = experiment_config['num_threads']
     kilobot_bias = experiment_config['kilobot_bias']
 
-    df = io_scripts.readLMCRWFptResults(num_robots, alpha_values, rho_values, evaluations)
+    df = io_scripts.readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluations)
 
     x_value = "Label"
     y_value = "First Passage Time"

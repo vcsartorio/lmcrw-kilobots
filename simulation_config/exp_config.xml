@@ -5,7 +5,7 @@
     num_robots="80"
     arena_radius="0.925"
     simulation_time="12000"
-    max_trials="75"
+    max_trials="100"
     evaluations="2"
     num_threads="10"
     kilobot_bias="True">

@@ -29,9 +29,11 @@ def readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluation
     data_dict['strategy'] = []
     data_dict['alpha'] = []
     data_dict['rho'] = []
-    data_dict['First Passage Time'] = []
+    data_dict['Weibull Discovery Time'] = []
+    data_dict['Discovery Time'] = []
+    data_dict['Fraction Discovery'] = []
 
-    for subdir, dirs, files in os.walk(folder):
+    for subdir, dirs, files in os.walk(os.getcwd() + folder):
         files.sort()
 
         for file_name in files:
@@ -53,16 +55,19 @@ def readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluation
                 if e.endswith("e"):
                     experiment_parameters['evaluations'] = int(e.replace("e", ""))
 
-            if experiment_parameters['strategy'] != "crwlevy":
+            if experiment_parameters['strategy'] != "LMCRW":
                 continue
             if experiment_parameters['alpha'] not in alpha_values:
                 continue
             if experiment_parameters['rho'] not in rho_values:
                 continue
+            if experiment_parameters['n_robots'] != num_robots:
+                continue
             if experiment_parameters['evaluations'] != evaluations:
                 continue
  
-            with open(folder + file_name, "r") as dfile:
+            print(f"Openning: {file_name}")
+            with open(os.getcwd() + folder + file_name, "r") as dfile:
                 try:
                     label_name = f"a:{experiment_parameters['alpha']} r:{experiment_parameters['rho']}"
                     read_tsv = csv.reader(dfile, delimiter="\t")
@@ -72,7 +77,9 @@ def readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluation
                         data_dict['strategy'].append(experiment_parameters['strategy'])
                         data_dict['alpha'].append(experiment_parameters['alpha'])
                         data_dict['rho'].append(experiment_parameters['rho'])
-                        data_dict['First Passage Time'].append(float(row[1])/32.0)
+                        data_dict['Weibull Discovery Time'].append(float(row[1])/32.0)
+                        data_dict['Discovery Time'].append(float(row[2])/32.0)
+                        data_dict['Fraction Discovery'].append(float(row[3]))
                     dfile.close()
                 except Exception as e:
                     print(("Couldnt read results file: %s!\nException: " + str(e)) % (file_name))
