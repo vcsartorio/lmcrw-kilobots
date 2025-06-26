@@ -15,7 +15,6 @@ test_scripts/*
 plot scripts/results*
 **/__pycache__
 *.pyc
-images/
 *_position.tsv
 *_time_results.tsv
 *.pkl
