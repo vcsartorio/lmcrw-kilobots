@@ -35,7 +35,7 @@ def exploratorySearchForFptEvaluation(experiment_config):
         print("Starting performance evaluation for LMCRW alpha:%.1f rho:%.2f.\nEvaluations: %d - Trials: %d " % (lmcrw.alpha, lmcrw.rho, evaluations, max_trials))
         for count_eva in range(evaluations):
             print("\nStarting %d trials (%d evaluation of %d):" % (max_trials, (count_eva+1), evaluations))
-            argos_path = generated_sim_config_folder + "kilobot_sim_%.3f_%d_%.1f_%.2f.argos" % (arena_radius, num_robots, alpha, rho)
+            argos_path = generated_sim_config_folder + "kilobot_sim_%.3f_%d_%.1f_%.2f.argos" % (arena_radius, num_robots, lmcrw.alpha, lmcrw.rho)
             experiment = KilobotsSearchExperiment.KilobotsExperiment(num_threads, num_robots, target_positions, arena_radius, simulation_time, kilobot_bias, argos_path)
             experiment.executeKilobotExperimentTrials(lmcrw)
             lmcrw.experiment_performance.resetResults()
