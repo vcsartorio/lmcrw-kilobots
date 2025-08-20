@@ -5,8 +5,9 @@ import src.utils.LMCRW as LMCRW
 import src.KilobotsSearchExperiment as KilobotsSearchExperiment
 
 generated_sim_config_folder = "simulation_config/generated_configs/"
+experiment_folder = "Fpt-performance"
 
-def exploratorySearchForFptEvaluation(experiment_config):
+def exploratorySearchForFptEvaluation(experiment_config, data_path):
     alpha_values = [1.2, 1.4, 1.6, 1.8, 2.0]
     rho_values = [0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]
     
@@ -17,6 +18,7 @@ def exploratorySearchForFptEvaluation(experiment_config):
     evaluations = experiment_config['evaluations']
     num_threads = experiment_config['num_threads']
     kilobot_bias = experiment_config['kilobot_bias']
+    experiment_path = f"{data_path}/{experiment_folder}/"
 
     random.seed(15)
     target_positions = Targets.createTargetPosition(max_trials, False, arena_radius)
@@ -25,7 +27,7 @@ def exploratorySearchForFptEvaluation(experiment_config):
     for alpha in alpha_values:
         for rho in rho_values:
             lmcrw = LMCRW.LMCRW(alpha, rho, exp_id='0001')
-            lmcrw.setPerformanceExperiment(num_robots, max_trials, round((arena_radius-0.025)*200), num_eval=evaluations, save_exp=True)
+            lmcrw.setPerformanceExperiment(num_robots, max_trials, round((arena_radius-0.025)*200), num_eval=evaluations, exp_path=experiment_path, save_exp=True)
             lmcrws_list.append(lmcrw)
 
     print(f"Exploratory parameters search for the best first passage time of LMCRW (Robots: {num_robots} - Arena Radius: {arena_radius} cm - Simulation Time: {simulation_time} sec - Kilobot Bias: {kilobot_bias})")

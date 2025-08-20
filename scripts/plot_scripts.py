@@ -22,7 +22,7 @@ def plotHeatMapParametersSearch(experiment_config):
     result_discovery = df.pivot_table(index='alpha', columns='rho', values='Discovery Time')
     result_frac_disc = df.pivot_table(index='alpha', columns='rho', values='Fraction Discovery')
 
-    ax = sns.heatmap(result_frac_disc, annot=True, fmt=".2f", cmap='mako',cbar_kws={'label':'Fraction Discovery'})
+    ax = sns.heatmap(result_weibull, annot=True, fmt=".2f", cmap='mako',cbar_kws={'label':'Fraction Discovery'})
     ax.invert_yaxis()
     plt.title(f"LMCRW experiment w/ {num_robots}R - {evaluations} evaluations of 100 trials")
     plt.show()
@@ -37,9 +37,9 @@ def plotBoxplotParametersSearch(experiment_config):
     kilobot_bias = experiment_config['kilobot_bias']
 
     df = io_scripts.readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluations)
-
+    
     x_value = "Label"
-    y_value = "First Passage Time"
+    y_value = "Weibull Discovery Time"
     sns.set_style("whitegrid")
     ax = sns.boxplot(x=x_value, y=y_value, hue="alpha",linewidth=1, showfliers=True, dodge=False, data=df)
 

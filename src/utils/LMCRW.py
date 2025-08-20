@@ -10,7 +10,7 @@ class LMCRW:
 
     def setPerformanceExperiment(self, num_robots, num_trials, arena_radius, **kwargs):
         self.fpt_result = kwargs.get('fpt')
-        self.experiment_performance = ExperimentPerformance.ExperimentPerformance(num_robots, num_trials)
+        self.experiment_performance = ExperimentPerformance.ExperimentPerformance(num_robots, num_trials, kwargs.get('exp_path'))
         if kwargs.get('save_exp'):
             self.experiment_date = kwargs.get('date')
             self.num_evaluations = kwargs.get('num_eval')

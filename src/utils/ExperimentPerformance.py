@@ -9,11 +9,9 @@ import csv
 import os
 import pandas as pd
 
-experimental_folder = "data/Fpt-performance/"
-
 class ExperimentPerformance:
 
-    def __init__(self, n_robots, n_trials):
+    def __init__(self, n_robots, n_trials, experimental_folder):
         self.num_robots = n_robots
         self.max_trials = n_trials
         self.save_experiment = False
@@ -21,6 +19,7 @@ class ExperimentPerformance:
         self.trials_done = 0
         self.experiment_id = -1
         self.weibull_disc_evaluations_value = []
+        self.experimental_folder = experimental_folder
         self.startTimeValues()
 
     def initializeExperiment(self, performance_file, exp_id):
@@ -145,17 +144,17 @@ class ExperimentPerformance:
 
     def checkFinalPerformanceResultsFile(self):
         if self.save_experiment:
-            if not os.path.exists(experimental_folder):
-                os.makedirs(experimental_folder)
+            if not os.path.exists(self.experimental_folder):
+                os.makedirs(self.experimental_folder)
                 
-            file_path = experimental_folder + self.final_performance_result
+            file_path = self.experimental_folder + self.final_performance_result
             if os.path.exists(file_path):
                 # elements = file_path.replace(".tsv", "").split("_")
                 # max_evaluations = 500
                 # for e in elements:
                 #     if e.endswith("k"):
                 #         max_evaluations = int(e.replace("k", ""))
-                # result_file = pd.read_csv(experimental_folder + self.final_performance_result, '\t')
+                # result_file = pd.read_csv(self.experimental_folder + self.final_performance_result, '\t')
                 # if len(result_file) >= max_evaluations:
                 #     print("WARNING! In %s file, experiment has already perform %d trials! Quiting ..." % (self.final_performance_result, self.max_trials))
                 #     exit(1)
@@ -165,7 +164,7 @@ class ExperimentPerformance:
 
     def createFinalPerformanceFile(self):
         print("Creating %s ..." % (self.final_performance_result))
-        with open(experimental_folder + self.final_performance_result, 'wt') as out_file:
+        with open(self.experimental_folder + self.final_performance_result, 'wt') as out_file:
             try:
                 tsv_writer = csv.writer(out_file, delimiter='\t')
                 tsv_writer.writerow(['Id', 'Weibull Discovery Time', 'Discovery Time', 'Fraction Discovery', 'Information Time', 'Fraction Information'])
@@ -175,8 +174,8 @@ class ExperimentPerformance:
         
     def saveFinalPerformanceResult(self):
         if self.experiment_id == -1:
-            self.experiment_id = len(pd.read_csv(experimental_folder + self.final_performance_result, '\t')) + 1
-        with open(experimental_folder + self.final_performance_result, 'a') as out_file:
+            self.experiment_id = len(pd.read_csv(self.experimental_folder + self.final_performance_result, '\t')) + 1
+        with open(self.experimental_folder + self.final_performance_result, 'a') as out_file:
             try:
                 tsv_writer = csv.writer(out_file, delimiter='\t')
                 tsv_writer.writerow([self.experiment_id, round(self.weibull_discovery_time, 0), round(self.discovery_time, 0), round(self.fraction_discovery, 4), 

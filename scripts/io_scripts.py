@@ -3,7 +3,8 @@ import os
 import csv
 import pandas as pd
 
-def readExperimentConfigFile(exp_config_options):
+def readExperimentConfigFile(data_path):
+    exp_config_options = f"{data_path}/exp_config.xml"
     exp_config = dict()
 
     try:
@@ -24,6 +25,7 @@ def readExperimentConfigFile(exp_config_options):
     return exp_config
 
 def readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluations):
+    print("Reading LMCRW results...")
     data_dict = dict()
     data_dict['Label'] = []
     data_dict['strategy'] = []
