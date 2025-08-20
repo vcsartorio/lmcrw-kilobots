@@ -431,9 +431,10 @@ void CIKilobotLoopFunctions::PostExperiment()
             frac_inf = 0;
       }
 
-      std::cout << disc_time << " " << inf_time << " " << frac_disc << " " << frac_inf << " ";
+      std::cout << "RESULTS: " << disc_time << " " << inf_time << " " << frac_disc << " " << frac_inf << " ";
       for (uint i = 1; i <= m_unNumRobots; i++)
             std::cout << (m_cKilobotDiscoveryInformationTime[i])[0] << " ";
+      std::cout << std::endl;
 
       LOG.Flush();
 }

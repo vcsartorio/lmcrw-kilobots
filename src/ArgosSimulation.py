@@ -39,22 +39,29 @@ def checkProcessStatus(simulation, num_robots):
             output, error = simulation.process.communicate()
             if simulation.process.returncode != 0: 
                 raise Exception("Simulation %d failed! Process Error: %s" % (simulation.process.pid, error))
+
+            out_decoded = output.decode('utf-8', errors='ignore')
+            data_line = None
+            for line in out_decoded.split('\n'):
+                if line.startswith("RESULTS: "):
+                    data_line = line
+                    break
+            if data_line is None:
+                raise Exception(f"Could not find the 'RESULTS: ' line in the simulation output.\nFull Output:\n---\n{out_decoded}\n---")
+            
+            results_str = data_line.replace("RESULTS: ", "").strip()
+            lines = results_str.split(' ')
+            if len(lines) == (4 + num_robots):
+                sim_results['disc'] = int(lines[0])
+                sim_results['inf'] = int(lines[1])
+                sim_results['frac disc'] = float(lines[2])
+                sim_results['frac inf'] = float(lines[3])
+                sim_results['disc robots'] = []
+                for line in lines[4:]:
+                    sim_results['disc robots'].append(int(line))
+                process_has_end = True
             else:
-                out_decoded = output.decode('utf-8')
-                ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-                results = ansi_escape.sub('', out_decoded).split('\n')
-                lines = results[-1].split(' ')[:-1]
-                if len(lines) == (4 + num_robots):
-                    sim_results['disc'] = int(lines[0])
-                    sim_results['inf'] = int(lines[1])
-                    sim_results['frac disc'] = float(lines[2])
-                    sim_results['frac inf'] = float(lines[3])
-                    sim_results['disc robots'] = []
-                    for line in lines[4:]:
-                        sim_results['disc robots'].append(int(line))
-                    process_has_end = True
-                else:
-                    raise Exception("Fitness file of %d individual %d trial has %d lines" % (simulation.sim_id, simulation.trial, len(lines)))
+                raise Exception(f"The results line has {len(lines)} fields, but expected {(4 + num_robots)}.\nLine Found: '{data_line}'\nFull Output:\n---\n{out_decoded}\n---")
         except Exception as e:
             print("Code Exception: %s" % (str(e)))
             exit(1)
