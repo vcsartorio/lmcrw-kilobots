@@ -13,12 +13,15 @@ add_compile_options(-std=c++11)
 # Set the path additional cmake files must be searched for
 #
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
+message(STATUS ${CMAKE_SOURCE_DIR})
 
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} /usr/local/include)
 
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/kilobots )
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/local/lib)
+
+message(STATUS ${CMAKE_INCLUDE_PATH})
 
 
 #
