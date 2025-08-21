@@ -18,14 +18,17 @@ def plotHeatMapParametersSearch(experiment_config):
     kilobot_bias = experiment_config['kilobot_bias']
 
     df = io_scripts.readLMCRWFptResults(folder, alpha_values, rho_values, num_robots, evaluations)
-    result_weibull = df.pivot_table(index='alpha', columns='rho', values='Weibull Discovery Time')
-    result_discovery = df.pivot_table(index='alpha', columns='rho', values='Discovery Time')
-    result_frac_disc = df.pivot_table(index='alpha', columns='rho', values='Fraction Discovery')
+    print(df)
+    plots_dict = dict()
+    plots_dict['Weibull Discovery Time'] = {'df':df.pivot_table(index='alpha', columns='rho', values='Weibull Discovery Time'), 'cmap':"Purples_r"}
+    plots_dict['Discovery Time'] = {'df':df.pivot_table(index='alpha', columns='rho', values='Discovery Time'), 'cmap':"Blues_r"}
+    plots_dict['Fraction Discovery'] = {'df':df.pivot_table(index='alpha', columns='rho', values='Fraction Discovery'), 'cmap':"Greens_r"}
 
-    ax = sns.heatmap(result_weibull, annot=True, fmt=".2f", cmap='mako',cbar_kws={'label':'Fraction Discovery'})
-    ax.invert_yaxis()
-    plt.title(f"LMCRW experiment w/ {num_robots}R - {evaluations} evaluations of 100 trials")
-    plt.show()
+    for keys, values in plots_dict.items():
+        ax = sns.heatmap(values['df'], annot=True, fmt=".2f", cmap=values['cmap'], cbar_kws={'label':f"{keys}"})
+        ax.invert_yaxis()
+        plt.title(f"LMCRW experiment w/ {num_robots}R - {evaluations} evaluations of 50 trials")
+        plt.show()
 
 def plotBoxplotParametersSearch(experiment_config):
     num_robots = experiment_config['num_robots']
