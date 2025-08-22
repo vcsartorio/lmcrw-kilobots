@@ -8,7 +8,7 @@ generated_sim_config_folder = "simulation_config/generated_configs/"
 experiment_folder = "Fpt-performance"
 
 def exploratorySearchForFptEvaluation(experiment_config, data_path):
-    alpha_values = [1.2, 1.4, 1.6, 1.8, 2.0]
+    alpha_values = [1.4, 1.6, 1.8, 2.0]
     rho_values = [0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]
     
     num_robots = experiment_config['num_robots']
@@ -26,6 +26,8 @@ def exploratorySearchForFptEvaluation(experiment_config, data_path):
     lmcrws_list = []
     for alpha in alpha_values:
         for rho in rho_values:
+            if alpha == 1.4 and rho in [0.0, 0.15, 0.3, 0.45]:
+                continue
             lmcrw = LMCRW.LMCRW(alpha, rho, exp_id='0001')
             lmcrw.setPerformanceExperiment(num_robots, max_trials, round((arena_radius-0.025)*200), num_eval=evaluations, exp_path=experiment_path, save_exp=True)
             lmcrws_list.append(lmcrw)
