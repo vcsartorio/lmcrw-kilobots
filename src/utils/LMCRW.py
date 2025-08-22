@@ -14,7 +14,7 @@ class LMCRW:
         if kwargs.get('save_exp'):
             self.experiment_date = kwargs.get('date')
             self.num_evaluations = kwargs.get('num_eval')
-            self.performance_file = "LMCRW_%dR_%.1fa_%.2fp_%dcm_%de_%s.tsv" % (num_robots, self.alpha, self.rho, arena_radius, self.num_evaluations, self.experiment_date if self.experiment_date else "")
+            self.performance_file = f"crwlevy_{num_robots}R_{self.alpha:.1f}a_{self.rho:.2f}p_{self.num_evaluations}e_{arena_radius}cm.tsv"
             self.experiment_performance.initializeExperiment(self.performance_file, self.exp_id)
 
     def resetExperimentResults(self):
