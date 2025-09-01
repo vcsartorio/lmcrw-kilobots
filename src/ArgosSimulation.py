@@ -5,22 +5,18 @@ import os
 from lxml import etree
 
 
-def callArgosSimulation(argos_simulation_file, sim_id):
-    # parser = etree.XMLParser(remove_comments = False)
-    # etree.set_default_parser(parser)
-    # tree = etree.parse(argos_folder_path + argos_simulation_file)
-    # root = tree.getroot()
-    # for loop_functions in root.iter('loop_functions'):
-    #     loop_functions.set("strategy", "%s" % strategy.upper())
-    #     loop_functions.set("num_nodes", "%d" % num_nodes)
-    #     loop_functions.set("num_robots", "%d" % num_robots)
-    #     # loop_functions.set("num_robots", "%d" % 1)
-    #     loop_functions.set("target_posx", "%.6f" % target_pos[0])
-    #     loop_functions.set("target_posy", "%.6f" % target_pos[1])
-    #     loop_functions.set("id_simulation", "%s" % sim_id)
-    #     loop_functions.set("arena_radius", "%.3f" % arena_radius)
-    #     loop_functions.set("save_position", "%d" % (1 if save_pos else 0))
-    # id_simu_path = argos_folder_path + str(sim_id) + argos_simulation_file
+def callArgosSimulation(argos_simulation_file, arena_radius, num_robots, sim_time, sim_id):
+    parser = etree.XMLParser(remove_comments = False)
+    etree.set_default_parser(parser)
+    tree = etree.parse(argos_simulation_file)
+    root = tree.getroot()
+    for experiment in root.iter('experiment'):
+        experiment.set("length", "%d" % sim_time)
+    for loop_functions in root.iter('loop_functions'):
+        loop_functions.set("num_robots", "%d" % num_robots)
+        loop_functions.set("id_simulation", "%s" % sim_id)
+        loop_functions.set("arena_radius", "%.3f" % arena_radius)
+    tree.write(argos_simulation_file, xml_declaration = True)
     while True:
         try:
             process = Popen(["argos3", "-c", argos_simulation_file], stdout=PIPE, stderr=PIPE)

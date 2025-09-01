@@ -68,7 +68,7 @@ class KilobotsExperiment(object):
         if len(simulation_pool) < self.num_threads:
             trial = experiment.experiment_performance.num_trials
             sim_id = experiment.exp_id + f'{trial:03}'
-            process = ArgosSimulation.callArgosSimulation(self.argos_path, sim_id)
+            process = ArgosSimulation.callArgosSimulation(self.argos_path, self.arena_radius, self.num_robots, self.simulation_time, sim_id)
             simulation_process = self.KilobotSimulation(int(experiment.exp_id), trial, process)
             simulation_pool.append(simulation_process)
             print(f'Running {int(experiment.exp_id)} Experiment -> {trial+1} trial! Active Threads: {len(simulation_pool)}')

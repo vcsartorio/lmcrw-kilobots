@@ -7,6 +7,7 @@ import scripts.io_scripts as io_scripts
 import scripts.fpt_evaluation as fpt_evaluation
 import scripts.exploratory_parameters_search_fpt as exploratory_parametes_search_fpt
 import scripts.plot_scripts as plot_scripts
+import scripts.trials_number_evaluation as trials_number_evaluation
 
 data_path = "/input/"
 
@@ -19,6 +20,8 @@ if __name__ == "__main__":
         try:
             if script_name == "fpt_evaluation":
                 fpt_evaluation.performanceEvaluation(experiment_config, data_path)
+            if script_name == "trials_test":
+                trials_number_evaluation.evaluateDifferentTrialsResults(experiment_config, data_path)
             if script_name == "search_par_fpt":
                 exploratory_parametes_search_fpt.exploratorySearchForFptEvaluation(experiment_config, data_path)
             if script_name == "plot_results":

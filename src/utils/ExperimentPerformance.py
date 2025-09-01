@@ -8,22 +8,24 @@ from subprocess import Popen, PIPE
 import csv
 import os
 import pandas as pd
+import warnings
 
 class ExperimentPerformance:
 
-    def __init__(self, n_robots, n_trials, experimental_folder):
+    def __init__(self, n_robots, n_trials, sim_time, **kwargs):
         self.num_robots = n_robots
         self.max_trials = n_trials
+        self.max_simulation_time = sim_time
+        self.experimental_folder = kwargs.get('exp_path')
         self.save_experiment = False
         self.computed_final_fitness = False
         self.trials_done = 0
         self.experiment_id = -1
         self.weibull_disc_evaluations_value = []
-        self.experimental_folder = experimental_folder
         self.startTimeValues()
 
     def initializeExperiment(self, performance_file, exp_id):
-        self.final_performance_result = performance_file
+        self.final_performance_file = performance_file
         self.save_experiment = True
         self.experiment_id = int(exp_id)
         self.checkFinalPerformanceResultsFile()
@@ -63,22 +65,59 @@ class ExperimentPerformance:
     def calculateWeibullDiscoveryTime(self):
         fpt = np.asarray(self.discovery_robots_values)
         censored = fpt.size - np.count_nonzero(fpt)
+        mean = self.discovery_time
         if censored == 0:
-            return self.discovery_time
+            return mean
+        
         fpt = fpt[np.argsort(fpt.reshape(-1))]
         times_value = fpt[censored:].reshape(-1)
+        if times_value.size == 0:
+            print("AVISO: Nenhum robô encontrou o alvo. Não é possível calcular a média.")
+            return np.nan
 
-        F = self.estimatorKM(times_value, censored)
+        F_empirical = self.estimatorKM(times_value, censored)
 
-        # popt_weibull[0] is alpha and popt_weibull[1] is gamma
-        bound_is = 75000
-        popt_weibull, _ = curve_fit(self.weib_cdf, xdata=times_value, ydata=np.squeeze(F), bounds=(0, [bound_is, 10]), method='trf')
-        # print("Alpha: %f - Gamma: %f" % (popt_weibull[0], popt_weibull[1]))
-        mean = sc.gamma(1 + (1. / popt_weibull[1])) * popt_weibull[0]
-        std_dev = np.sqrt(popt_weibull[0] ** 2 * sc.gamma(1 + (2. / popt_weibull[1])) - mean ** 2)
-        std_error = std_dev / np.sqrt(times_value.size)
-        # print("Mean Weibull: %f - Standard Deviation: %f - Standard Error: %f" % (mean, std_dev, std_error))
-        # self.weibull_plot(mean, std_dev, times_value, popt_weibull, F)
+        # --- Início da Lógica Heurística para o bound_is ---
+        kilobot_tick_per_seconds = 32
+        bound_is = self.max_simulation_time *kilobot_tick_per_seconds
+        max_iterations = 10
+        target_ratio = 0.63
+
+        for i in range(max_iterations):
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore") 
+                    popt_weibull, _ = curve_fit(
+                        self.weib_cdf,
+                        xdata=times_value,
+                        ydata=np.squeeze(F_empirical),
+                        bounds=([1e-9, 1e-9], [bound_is, 10]),
+                        method='trf'
+                )
+                popt_weibull, _ = curve_fit(self.weib_cdf, xdata=times_value, ydata=np.squeeze(F_empirical), bounds=(0, [bound_is, 10]), method='trf')
+            except RuntimeError as e:
+                print(f"Erro no curve_fit: {e}. O bound pode ser muito restritivo. Interrompendo.")
+                return np.nan
+            
+            # popt_weibull[0] is alpha and popt_weibull[1] is gamma
+            alpha, gamma = popt_weibull
+            current_ratio = alpha / bound_is
+            # print("Alpha: %f - Gamma: %f" % (popt_weibull[0], popt_weibull[1]))
+            # print(f"Ratio (Alpha / Bound): {current_ratio:.2%}")
+            
+            mean = sc.gamma(1 + (1. / gamma)) * alpha
+            std_dev = np.sqrt(alpha ** 2 * sc.gamma(1 + (2. / gamma)) - mean ** 2)
+            std_error = std_dev / np.sqrt(times_value.size)
+            # print("Mean Weibull: %f - Standard Deviation: %f - Standard Error: %f" % (mean, std_dev, std_error))
+
+            # Condição de parada: o alpha ocupa 63% ou menos do espaço de busca
+            if current_ratio <= target_ratio+0.01:
+                # print(f"Condição satisfeita ({current_ratio:.2%} <= {target_ratio:.2%}). Parando o ajuste.")
+                break
+            else:
+                bound_is = alpha / target_ratio
+                if i == max_iterations - 1:
+                    print("\nAVISO: Número máximo de iterações atingido sem satisfazer a condição.")
 
         return mean
 
@@ -147,24 +186,24 @@ class ExperimentPerformance:
             if not os.path.exists(self.experimental_folder):
                 os.makedirs(self.experimental_folder)
                 
-            file_path = self.experimental_folder + self.final_performance_result
+            file_path = self.experimental_folder + self.final_performance_file
             if os.path.exists(file_path):
                 # elements = file_path.replace(".tsv", "").split("_")
                 # max_evaluations = 500
                 # for e in elements:
                 #     if e.endswith("k"):
                 #         max_evaluations = int(e.replace("k", ""))
-                # result_file = pd.read_csv(self.experimental_folder + self.final_performance_result, '\t')
+                # result_file = pd.read_csv(self.experimental_folder + self.final_performance_file, '\t')
                 # if len(result_file) >= max_evaluations:
-                #     print("WARNING! In %s file, experiment has already perform %d trials! Quiting ..." % (self.final_performance_result, self.max_trials))
+                #     print("WARNING! In %s file, experiment has already perform %d trials! Quiting ..." % (self.final_performance_file, self.max_trials))
                 #     exit(1)
                 pass
             else:
                 self.createFinalPerformanceFile()
 
     def createFinalPerformanceFile(self):
-        print("Creating %s ..." % (self.final_performance_result))
-        with open(self.experimental_folder + self.final_performance_result, 'wt') as out_file:
+        print("Creating %s ..." % (self.final_performance_file))
+        with open(self.experimental_folder + self.final_performance_file, 'wt') as out_file:
             try:
                 tsv_writer = csv.writer(out_file, delimiter='\t')
                 tsv_writer.writerow(['Id', 'Weibull Discovery Time', 'Discovery Time', 'Fraction Discovery', 'Information Time', 'Fraction Information'])
@@ -174,8 +213,8 @@ class ExperimentPerformance:
         
     def saveFinalPerformanceResult(self):
         if self.experiment_id == -1:
-            self.experiment_id = len(pd.read_csv(self.experimental_folder + self.final_performance_result, '\t')) + 1
-        with open(self.experimental_folder + self.final_performance_result, 'a') as out_file:
+            self.experiment_id = len(pd.read_csv(self.experimental_folder + self.final_performance_file, '\t')) + 1
+        with open(self.experimental_folder + self.final_performance_file, 'a') as out_file:
             try:
                 tsv_writer = csv.writer(out_file, delimiter='\t')
                 tsv_writer.writerow([self.experiment_id, round(self.weibull_discovery_time, 0), round(self.discovery_time, 0), round(self.fraction_discovery, 4), 
@@ -183,3 +222,18 @@ class ExperimentPerformance:
                 out_file.close()
             except Exception as e:
                 print("Couldnt save final performance results!\n" + str(e))
+
+    def saveAllRobotsFptValues(self):
+        all_robots_file = "robots_values_" + self.final_performance_file
+        if self.experiment_id == -1:
+            self.experiment_id = len(pd.read_csv(self.experimental_folder + all_robots_file, '\t')) + 1
+        with open(self.experimental_folder + all_robots_file, 'wt') as out_file:
+            try:
+                tsv_writer = csv.writer(out_file, delimiter='\t')
+                for trial in np.arange(1, self.max_trials+1):
+                    first_robot = (trial-1)*self.num_robots
+                    last_robot = trial*self.num_robots
+                    tsv_writer.writerow(self.discovery_robots_values[first_robot:last_robot])
+                out_file.close()
+            except Exception as e:
+                print("Couldnt save all robots fpt values!\n" + str(e))
