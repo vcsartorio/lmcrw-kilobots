@@ -28,6 +28,7 @@ def callArgosSimulation(argos_simulation_file, arena_radius, num_robots, sim_tim
     return process
 
 def checkProcessStatus(simulation, num_robots):
+    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
     process_has_end = False
     sim_results = dict()
     if simulation.simulationHasEnd():
@@ -36,10 +37,11 @@ def checkProcessStatus(simulation, num_robots):
             if simulation.process.returncode != 0: 
                 raise Exception("Simulation %d failed! Process Error: %s" % (simulation.process.pid, error))
 
-            out_decoded = output.decode('utf-8', errors='ignore')
+            out_decoded_raw = output.decode('utf-8', errors='ignore')
+            out_decoded = ansi_escape.sub('', out_decoded_raw)
             data_line = None
             for line in out_decoded.split('\n'):
-                if line.startswith("RESULTS: "):
+                if "RESULTS:" in line:
                     data_line = line
                     break
             if data_line is None:
