@@ -27,13 +27,13 @@ def exploratorySearchForFptEvaluation(experiment_config, data_path):
     for alpha in alpha_values:
         for rho in rho_values:
             lmcrw = LMCRW.LMCRW(alpha, rho, exp_id='0001')
-            lmcrw.setPerformanceExperiment(num_robots, max_trials, round((arena_radius-0.025)*200), simulation_time, num_eval=evaluations, exp_path=experiment_path, save_exp=True)
             lmcrws_list.append(lmcrw)
 
     print(f"Exploratory parameters search for the best first passage time of LMCRW (Robots: {num_robots} - Arena Radius: {arena_radius} cm - Simulation Time: {simulation_time} sec - Kilobot Bias: {kilobot_bias})")
     print(f"Alpha values: {','.join(map(str, alpha_values))}\nRho values: {','.join(map(str, rho_values))}\n")
     for lmcrw in lmcrws_list:
         start_time = time.time()
+        lmcrw.setPerformanceExperiment(num_robots, max_trials, round((arena_radius-0.025)*200), simulation_time, num_eval=evaluations, exp_path=experiment_path, save_exp=True)
         print("Starting performance evaluation for LMCRW alpha:%.1f rho:%.2f.\nEvaluations: %d - Trials: %d " % (lmcrw.alpha, lmcrw.rho, evaluations, max_trials))
         for count_eva in range(evaluations):
             print("\nStarting %d trials (%d evaluation of %d):" % (max_trials, (count_eva+1), evaluations))
