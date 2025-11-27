@@ -2,6 +2,7 @@ from lxml import etree
 import os
 import csv
 import pandas as pd
+import glob
 
 def readExperimentConfigFile(data_path):
     exp_config_options = f"{data_path}/exp_config.xml"
@@ -142,3 +143,24 @@ def readRobotFptValues(folder, experiment_config):
                     print(("Couldnt read results file: %s!\nException: " + str(e)) % (file_name))
 
     return robot_values
+
+def cleanupTempFiles(folder_path, pattern):
+    full_path_pattern = os.path.join(folder_path, pattern)
+    temp_files = glob.glob(full_path_pattern)
+    
+    if not temp_files:
+        return
+
+    # print(f"Cleaning total of {len(temp_files)} temporary simulation_config files.")
+    deleted_count = 0
+    for file_path in temp_files:
+        try:
+            os.remove(file_path)
+            # print(f"   - Arquivo excluído: {os.path.basename(file_path)}")
+            deleted_count += 1
+        except OSError as e:
+            # Captura erros como permissão negada
+            print(f"   ❌ Erro ao excluir {os.path.basename(file_path)}: {e}")
+
+    print(f"Cleaning is finished. Total number of deleted files: {deleted_count}")
+    print("-" * 30)

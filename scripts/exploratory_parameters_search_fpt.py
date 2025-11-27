@@ -3,6 +3,7 @@ import time
 import src.utils.Targets as Targets
 import src.utils.LMCRW as LMCRW
 import src.KilobotsSearchExperiment as KilobotsSearchExperiment
+import scripts.io_scripts as io_scripts
 
 generated_sim_config_folder = "simulation_config/generated_configs/"
 experiment_folder = "Fpt-performance"
@@ -19,6 +20,8 @@ def exploratorySearchForFptEvaluation(experiment_config, data_path):
     num_threads = experiment_config['num_threads']
     kilobot_bias = experiment_config['kilobot_bias']
     experiment_path = f"{data_path}/{experiment_folder}/"
+
+    io_scripts.cleanupTempFiles(generated_sim_config_folder, "*_id:*.argos")
 
     random.seed(15)
     target_positions = Targets.createTargetPosition(max_trials, False, arena_radius)
